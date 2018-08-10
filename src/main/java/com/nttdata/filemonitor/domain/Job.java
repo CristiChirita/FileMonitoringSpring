@@ -5,6 +5,7 @@ import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.io.Serializable;
+import java.time.ZonedDateTime;
 import java.util.Objects;
 
 /**
@@ -20,6 +21,9 @@ public class Job implements Serializable {
 
     @Field("value")
     private String value;
+
+    @Field("date")
+    private ZonedDateTime date;
 
     // jhipster-needle-entity-add-field - JHipster will add fields here, do not remove
     public String getId() {
@@ -41,6 +45,19 @@ public class Job implements Serializable {
 
     public void setValue(String value) {
         this.value = value;
+    }
+
+    public ZonedDateTime getDate() {
+        return date;
+    }
+
+    public Job date(ZonedDateTime date) {
+        this.date = date;
+        return this;
+    }
+
+    public void setDate(ZonedDateTime date) {
+        this.date = date;
     }
     // jhipster-needle-entity-add-getters-setters - JHipster will add getters and setters here, do not remove
 
@@ -69,6 +86,7 @@ public class Job implements Serializable {
         return "Job{" +
             "id=" + getId() +
             ", value='" + getValue() + "'" +
+            ", date='" + getDate() + "'" +
             "}";
     }
 }

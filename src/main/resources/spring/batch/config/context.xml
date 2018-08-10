@@ -3,8 +3,8 @@
        xmlns:context="http://www.springframework.org/schema/context"
        xsi:schemaLocation="http://www.springframework.org/schema/beans
         http://www.springframework.org/schema/beans/spring-beans-3.2.xsd
-http://www.springframework.org/schema/jdbc
-	http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
+        http://www.springframework.org/schema/jdbc
+	    http://www.springframework.org/schema/jdbc/spring-jdbc.xsd">
 
     <bean id="dataSource" class="org.apache.commons.dbcp.BasicDataSource"
           lazy-init="true" destroy-method="close">
@@ -19,7 +19,7 @@ http://www.springframework.org/schema/jdbc
     <bean id="transactionManager"
           class="org.springframework.batch.support.transaction.ResourcelessTransactionManager"/>
 
-    <bean id="jobRepository"
+    <bean id="jobRepository" primary="true"
           class="org.springframework.batch.core.repository.support.JobRepositoryFactoryBean">
         <property name="dataSource" ref="dataSource"/>
         <property name="transactionManager" ref="transactionManager"/>
@@ -33,7 +33,7 @@ http://www.springframework.org/schema/jdbc
 
     <!-- Create meta-tables -->
     <jdbc:initialize-database data-source="dataSource">
-        <jdbc:script location="org/springframework/batch/core/schema-drop-hsqldb.sql"/>
-        <jdbc:script location="org/springframework/batch/core/schema-hsqldb.sql"/>
+        <jdbc:script location="classpath:/org/springframework/batch/core/schema-drop-hsqldb.sql"/>
+        <jdbc:script location="classpath:/org/springframework/batch/core/schema-hsqldb.sql"/>
     </jdbc:initialize-database>
 </beans>

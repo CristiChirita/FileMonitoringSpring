@@ -3,7 +3,7 @@ package com.nttdata.filemonitor.web.rest;
 import com.nttdata.filemonitor.FileMonitoringApp;
 
 import com.nttdata.filemonitor.domain.Job;
-import com.nttdata.filemonitor.repository.JobRepository;
+import com.nttdata.filemonitor.repository.MongoJobRepo;
 import com.nttdata.filemonitor.service.JobService;
 import com.nttdata.filemonitor.web.rest.errors.ExceptionTranslator;
 
@@ -20,9 +20,14 @@ import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 
+import java.time.Instant;
+import java.time.ZonedDateTime;
+import java.time.ZoneOffset;
+import java.time.ZoneId;
 import java.util.List;
 
 
+import static com.nttdata.filemonitor.web.rest.TestUtil.sameInstant;
 import static com.nttdata.filemonitor.web.rest.TestUtil.createFormattingConversionService;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasItem;
@@ -41,8 +46,11 @@ public class JobResourceIntTest {
     private static final String DEFAULT_VALUE = "AAAAAAAAAA";
     private static final String UPDATED_VALUE = "BBBBBBBBBB";
 
+    private static final ZonedDateTime DEFAULT_DATE = ZonedDateTime.ofInstant(Instant.ofEpochMilli(0L), ZoneOffset.UTC);
+    private static final ZonedDateTime UPDATED_DATE = ZonedDateTime.now(ZoneId.systemDefault()).withNano(0);
+
     @Autowired
-    private JobRepository jobRepository;
+    private MongoJobRepo jobRepository;
 
     
 
@@ -81,7 +89,8 @@ public class JobResourceIntTest {
      */
     public static Job createEntity() {
         Job job = new Job()
-            .value(DEFAULT_VALUE);
+            .value(DEFAULT_VALUE)
+            .date(DEFAULT_DATE);
         return job;
     }
 
@@ -106,6 +115,7 @@ public class JobResourceIntTest {
         assertThat(jobList).hasSize(databaseSizeBeforeCreate + 1);
         Job testJob = jobList.get(jobList.size() - 1);
         assertThat(testJob.getValue()).isEqualTo(DEFAULT_VALUE);
+        assertThat(testJob.getDate()).isEqualTo(DEFAULT_DATE);
     }
 
     @Test
@@ -136,7 +146,8 @@ public class JobResourceIntTest {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.[*].id").value(hasItem(job.getId())))
-            .andExpect(jsonPath("$.[*].value").value(hasItem(DEFAULT_VALUE.toString())));
+            .andExpect(jsonPath("$.[*].value").value(hasItem(DEFAULT_VALUE.toString())))
+            .andExpect(jsonPath("$.[*].date").value(hasItem(sameInstant(DEFAULT_DATE))));
     }
     
 
@@ -150,7 +161,8 @@ public class JobResourceIntTest {
             .andExpect(status().isOk())
             .andExpect(content().contentType(MediaType.APPLICATION_JSON_UTF8_VALUE))
             .andExpect(jsonPath("$.id").value(job.getId()))
-            .andExpect(jsonPath("$.value").value(DEFAULT_VALUE.toString()));
+            .andExpect(jsonPath("$.value").value(DEFAULT_VALUE.toString()))
+            .andExpect(jsonPath("$.date").value(sameInstant(DEFAULT_DATE)));
     }
     @Test
     public void getNonExistingJob() throws Exception {
@@ -169,7 +181,8 @@ public class JobResourceIntTest {
         // Update the job
         Job updatedJob = jobRepository.findById(job.getId()).get();
         updatedJob
-            .value(UPDATED_VALUE);
+            .value(UPDATED_VALUE)
+            .date(UPDATED_DATE);
 
         restJobMockMvc.perform(put("/api/jobs")
             .contentType(TestUtil.APPLICATION_JSON_UTF8)
@@ -181,6 +194,7 @@ public class JobResourceIntTest {
         assertThat(jobList).hasSize(databaseSizeBeforeUpdate);
         Job testJob = jobList.get(jobList.size() - 1);
         assertThat(testJob.getValue()).isEqualTo(UPDATED_VALUE);
+        assertThat(testJob.getDate()).isEqualTo(UPDATED_DATE);
     }
 
     @Test
