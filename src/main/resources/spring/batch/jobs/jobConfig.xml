@@ -29,7 +29,7 @@
         </batch:step>
     </batch:job>
     <task:scheduled-tasks>
-        <task:scheduled ref="myScheduler" method="run" cron="*/5 * * * * *"/>
+        <task:scheduled ref="myScheduler" method="run" cron="${application.cron}"/>
     </task:scheduled-tasks>
 
 </beans>

@@ -15,6 +15,7 @@ import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportResource;
+import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
@@ -28,7 +29,6 @@ import java.util.Collection;
 @EnableAutoConfiguration(exclude = BatchAutoConfiguration.class)
 @ImportResource("classpath:spring/batch/jobs/jobConfig.xml")
 @EnableMongoRepositories
-@ComponentScan
 public class FileMonitoringApp {
 
     private static final Logger log = LoggerFactory.getLogger(FileMonitoringApp.class);

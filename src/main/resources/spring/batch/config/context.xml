@@ -31,6 +31,16 @@
         <property name="jobRepository" ref="jobRepository"/>
     </bean>
 
+
+
+    <!--<bean class="org.springframework.beans.factory.config.PropertyPlaceholderConfigurer">-->
+        <!--<property name="propertiesArray">-->
+            <!--<list>-->
+                <!--<ref bean="config"/>-->
+            <!--</list>-->
+        <!--</property>-->
+    <!--</bean>-->
+
     <!-- Create meta-tables -->
     <jdbc:initialize-database data-source="dataSource">
         <jdbc:script location="classpath:/org/springframework/batch/core/schema-drop-hsqldb.sql"/>
