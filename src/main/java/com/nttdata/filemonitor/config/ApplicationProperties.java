@@ -13,11 +13,35 @@ public class ApplicationProperties {
 
     private String cron;
 
+    private Folder folder;
+
+    public Folder getFolder() {
+        return folder;
+    }
+
+    public ApplicationProperties setFolder(Folder folder) {
+        this.folder = folder;
+        return this;
+    }
+
     public String getCron() {
         return cron;
     }
 
     public void setCron(String cron) {
         this.cron = cron;
+    }
+
+    static class Folder {
+        private String location;
+
+        public String getLocation() {
+            return location;
+        }
+
+        public Folder setLocation(String location) {
+            this.location = location;
+            return this;
+        }
     }
 }

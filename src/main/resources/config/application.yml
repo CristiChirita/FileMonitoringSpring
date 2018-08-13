@@ -102,3 +102,5 @@ jhipster:
 # ===================================================================
 application:
     cron: '*/5 * * * * *'
+    folder:
+        location: 'C:/Users/cristian.chirita/Downloads'
