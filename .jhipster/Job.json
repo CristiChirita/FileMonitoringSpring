@@ -6,6 +6,10 @@
         {
             "fieldName": "value",
             "fieldType": "String"
+        },
+        {
+            "fieldName": "date",
+            "fieldType": "ZonedDateTime"
         }
     ],
     "dto": "no",

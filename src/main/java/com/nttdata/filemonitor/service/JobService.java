@@ -1,12 +1,10 @@
 package com.nttdata.filemonitor.service;
 
 import com.nttdata.filemonitor.domain.Job;
-import com.nttdata.filemonitor.repository.JobRepository;
+import com.nttdata.filemonitor.repository.MongoJobRepo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import org.springframework.context.ApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.stereotype.Service;
 
 
@@ -20,9 +18,9 @@ public class JobService {
 
     private final Logger log = LoggerFactory.getLogger(JobService.class);
 
-    private final JobRepository jobRepository;
+    private final MongoJobRepo jobRepository;
 
-    public JobService(JobRepository jobRepository) {
+    public JobService(MongoJobRepo jobRepository) {
         this.jobRepository = jobRepository;
     }
 
@@ -43,7 +41,9 @@ public class JobService {
      */
     public List<Job> findAll() {
         log.debug("Request to get all Jobs");
-        return jobRepository.findAll();
+        List<Job> list = jobRepository.findAll();
+        int size = list.size();
+        return list.subList(size - 5, size);
     }
 
 
