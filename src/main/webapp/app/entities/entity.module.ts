@@ -2,6 +2,7 @@ import { NgModule, CUSTOM_ELEMENTS_SCHEMA } from '@angular/core';
 
 import { FileMonitoringJobModule } from './job/job.module';
 import { FileMonitoringFilesModule } from './files/files.module';
+import { FileMonitoringFolderModule } from './folder/folder.module';
 /* jhipster-needle-add-entity-module-import - JHipster will add entity modules imports here */
 
 @NgModule({
@@ -9,6 +10,7 @@ import { FileMonitoringFilesModule } from './files/files.module';
     imports: [
         FileMonitoringJobModule,
         FileMonitoringFilesModule,
+        FileMonitoringFolderModule,
         /* jhipster-needle-add-entity-module - JHipster will add entity modules here */
     ],
     declarations: [],
