@@ -1,5 +1,8 @@
 package com.nttdata.filemonitor;
 
+import com.google.auth.oauth2.GoogleCredentials;
+import com.google.firebase.FirebaseApp;
+import com.google.firebase.FirebaseOptions;
 import com.nttdata.filemonitor.config.ApplicationProperties;
 import com.nttdata.filemonitor.config.DefaultProfileUtil;
 
@@ -12,14 +15,13 @@ import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.batch.BatchAutoConfiguration;
 import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.ComponentScan;
-import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportResource;
-import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.env.Environment;
 import org.springframework.data.mongodb.repository.config.EnableMongoRepositories;
 
 import javax.annotation.PostConstruct;
+import java.io.File;
+import java.io.FileInputStream;
 import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.Collection;
@@ -90,5 +92,22 @@ public class FileMonitoringApp {
             hostAddress,
             env.getProperty("server.port"),
             env.getActiveProfiles());
+
+        try {
+//            File test =  new File("src/main/resources/spring/batch/config/fir-cm-9cea9-firebase-adminsdk-t4bur-0c29b3e49d.json");
+//            System.out.println(test.getAbsolutePath());
+
+            FileInputStream serviceAccount =
+                new FileInputStream("src/main/resources/spring/batch/config/fir-cm-9cea9-firebase-adminsdk-t4bur-0c29b3e49d.json");
+
+            FirebaseOptions options = new FirebaseOptions.Builder()
+                .setCredentials(GoogleCredentials.fromStream(serviceAccount))
+                .setDatabaseUrl("https://fir-cm-9cea9.firebaseio.com")
+                .build();
+
+            FirebaseApp.initializeApp(options);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 }

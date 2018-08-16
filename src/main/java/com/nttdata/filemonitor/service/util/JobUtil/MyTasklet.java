@@ -1,6 +1,10 @@
 package com.nttdata.filemonitor.service.util.JobUtil;
 
 
+import com.google.firebase.messaging.AndroidConfig;
+import com.google.firebase.messaging.AndroidNotification;
+import com.google.firebase.messaging.FirebaseMessaging;
+import com.google.firebase.messaging.Message;
 import com.nttdata.filemonitor.domain.Files;
 import com.nttdata.filemonitor.domain.Folder;
 import com.nttdata.filemonitor.service.FilesService;
@@ -107,9 +111,29 @@ public class MyTasklet implements Tasklet {
                 existing.setFiles(entities);
                 folderService.save(existing);
                 //Can compute file differences here
+
             }
         }
-        System.out.println(md5Hash);
+        //System.out.println(md5Hash);
+
+        String topic = "files";
+
+        Message message = Message.builder()
+            .putData("Name", folderLocation)
+            .putData("Hash", md5Hash)
+            .setAndroidConfig(AndroidConfig.builder()
+                .setTtl(3600 * 1000)
+                .setPriority(AndroidConfig.Priority.NORMAL)
+                .setNotification(AndroidNotification.builder()
+                    .setTitle("File modified!")
+                    .setBody("A file in " + folderLocation + " was modified")
+                    .build())
+                .build())
+            .setTopic(topic)
+            .build();
+
+        String response = FirebaseMessaging.getInstance().send(message, false);
+        System.out.println("Successfully sent message: " + response);
 
         return RepeatStatus.FINISHED;
     }
