@@ -101,6 +101,6 @@ jhipster:
 # https://www.jhipster.tech/common-application-properties/
 # ===================================================================
 application:
-    cron: '*/5 * * * * *'
+    cron: '*/10 * * * * *'
     folder:
         location: 'C:/Users/cristian.chirita/Downloads'

@@ -71,16 +71,7 @@ public class MyTasklet implements Tasklet {
                 String path = current.getAbsolutePath();
                 Files entity = new Files().name(current.getName()).location(path).lastModified(date);
                 entities.add(entity);
-                StringBuilder contentBuilder = new StringBuilder();
-                try (BufferedReader br = new BufferedReader(new FileReader(current.getAbsolutePath()))) {
-                    String sCurrentLine;
-//                    while ((sCurrentLine = br.readLine()) != null) {
-//                        contentBuilder.append(sCurrentLine).append("\n");
-//                    }
-                    data += current.getAbsolutePath() + current.lastModified();
-                } catch (Exception exception) {
-                    exception.printStackTrace();
-                }
+                data += current.getAbsolutePath() + current.lastModified();
             }
         }
 
@@ -89,6 +80,7 @@ public class MyTasklet implements Tasklet {
         byte[] byteData = md.digest();
         StringBuffer sb = new StringBuffer();
         for (int i = 0; i < byteData.length; i++) {
+            //Convert to hex; see https://www.mkyong.com/java/java-md5-hashing-example/
             sb.append(Integer.toString((byteData[i] & 0xff) + 0x100, 16).substring(1));
         }
         String md5Hash = sb.toString();
@@ -101,7 +93,6 @@ public class MyTasklet implements Tasklet {
             }
         }
         if (existing == null) {
-
             Folder folder = new Folder().hash(md5Hash).setFiles(entities).name(folderLocation);
             folderService.save(folder);
         }
@@ -112,29 +103,27 @@ public class MyTasklet implements Tasklet {
                 folderService.save(existing);
                 //Can compute file differences here
 
+
+                String topic = "files";
+
+                Message message = Message.builder()
+                    .putData("Name", folderLocation)
+                    .putData("Hash", md5Hash)
+                    .setAndroidConfig(AndroidConfig.builder()
+                        .setTtl(3600 * 1000)
+                        .setPriority(AndroidConfig.Priority.NORMAL)
+                        .setNotification(AndroidNotification.builder()
+                            .setTitle("File modified!")
+                            .setBody("A file in " + folderLocation + " was modified")
+                            .build())
+                        .build())
+                    .setTopic(topic)
+                    .build();
+
+                String response = FirebaseMessaging.getInstance().send(message, false);
+                System.out.println("Sent message: " + response);
             }
         }
-        //System.out.println(md5Hash);
-
-        String topic = "files";
-
-        Message message = Message.builder()
-            .putData("Name", folderLocation)
-            .putData("Hash", md5Hash)
-            .setAndroidConfig(AndroidConfig.builder()
-                .setTtl(3600 * 1000)
-                .setPriority(AndroidConfig.Priority.NORMAL)
-                .setNotification(AndroidNotification.builder()
-                    .setTitle("File modified!")
-                    .setBody("A file in " + folderLocation + " was modified")
-                    .build())
-                .build())
-            .setTopic(topic)
-            .build();
-
-        String response = FirebaseMessaging.getInstance().send(message, false);
-        System.out.println("Successfully sent message: " + response);
-
         return RepeatStatus.FINISHED;
     }
 
@@ -149,50 +138,4 @@ public class MyTasklet implements Tasklet {
         return files;
     }
 
-    private void navigate(File file) {
-        if (file.isDirectory()) {
-            String[] subNote = file.list();
-            for (String filename : subNote) {
-                navigate(new File(file, filename));
-            }
-        } else {
-            StringBuilder contentBuilder = new StringBuilder();
-            try (BufferedReader br = new BufferedReader(new FileReader(file.getAbsolutePath()))) {
-                String sCurrentLine;
-                while ((sCurrentLine = br.readLine()) != null) {
-                    contentBuilder.append(sCurrentLine).append("\n");
-                }
-                // data += contentBuilder.toString();
-            } catch (Exception exception) {
-                exception.printStackTrace();
-            }
-        }
-    }
-
-    //TODO: fix this
-    private void checkFile(File file) {
-        long lastModified = file.lastModified();
-        Instant i = Instant.ofEpochMilli(lastModified);
-        ZonedDateTime date = ZonedDateTime.ofInstant(i, ZoneId.systemDefault());
-        String path = file.getAbsolutePath();
-        for (Files f : entities) {
-            if (f.getLocation().equals(path)) {
-                int index = entities.indexOf(f);
-                //usage.set(index, true);
-                if (f.getLastModified().equals(date)) {
-                    //File is in db and was not modified since
-                } else {
-                    //File was modified since it was registered
-                    System.out.println("Found modified file.");
-                    f.setLastModified(date);
-                    filesService.save(f);
-                }
-                return;
-            }
-        }
-        //New file, register it
-        System.out.println("New file found: registering...");
-        Files entity = new Files().name(file.getName()).location(path).lastModified(date);
-        filesService.save(entity);
-    }
 }
