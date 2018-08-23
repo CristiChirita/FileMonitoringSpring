@@ -9,6 +9,7 @@ import com.nttdata.filemonitor.domain.Files;
 import com.nttdata.filemonitor.domain.Folder;
 import com.nttdata.filemonitor.service.FilesService;
 import com.nttdata.filemonitor.service.FolderService;
+import org.apache.commons.net.ftp.FTPClient;
 import org.springframework.batch.core.StepContribution;
 import org.springframework.batch.core.scope.context.ChunkContext;
 import org.springframework.batch.core.step.tasklet.Tasklet;
@@ -20,6 +21,7 @@ import javax.annotation.PostConstruct;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileReader;
+import java.io.IOException;
 import java.security.MessageDigest;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -39,12 +41,20 @@ public class MyTasklet implements Tasklet {
 
     private File baseFile;
 
-    private List<Files> entities;
+    private boolean login;
+
+    public static FTPClient client = new FTPClient();
 
 
     @PostConstruct
     public void setUp() {
         baseFile = new File(folderLocation);
+        try {
+            client.connect("127.0.0.1");
+            login = client.login("FileMonitoring", "pass");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -98,17 +108,30 @@ public class MyTasklet implements Tasklet {
         }
         else {
             if (!existing.getHash().equals(md5Hash)) {
+                List<String> modifiedFiles = new ArrayList<>();
+                //Can compute file differences here
+                for (Files file : entities) {
+                    Files current = getExistingFile(file.getLocation(), existing.getFiles());
+                    if (current == null) {
+                        modifiedFiles.add(file.getLocation());
+                    }
+                    else {
+                        if (!file.getLastModified().equals(current.getLastModified())) {
+                            modifiedFiles.add(file.getLocation());
+                        }
+                    }
+                }
+
                 existing.setHash(md5Hash);
                 existing.setFiles(entities);
                 folderService.save(existing);
-                //Can compute file differences here
-
 
                 String topic = "files";
 
                 Message message = Message.builder()
                     .putData("Name", folderLocation)
                     .putData("Hash", md5Hash)
+                    .putData("Modified files", modifiedFiles.toString())
                     .setAndroidConfig(AndroidConfig.builder()
                         .setTtl(3600 * 1000)
                         .setPriority(AndroidConfig.Priority.NORMAL)
@@ -124,6 +147,16 @@ public class MyTasklet implements Tasklet {
                 System.out.println("Sent message: " + response);
             }
         }
+            if (login) {
+
+                System.out.println("Connection established...");
+
+                // Try to logout and return the respective boolean value
+
+            } else {
+                System.out.println("Connection fail...");
+            }
+
         return RepeatStatus.FINISHED;
     }
 
@@ -138,4 +171,10 @@ public class MyTasklet implements Tasklet {
         return files;
     }
 
+    private Files getExistingFile(String name, List<Files> filesList) {
+        for (Files file : filesList) {
+            if (file.getLocation().equals(name)) return file;
+        }
+        return null;
+    }
 }

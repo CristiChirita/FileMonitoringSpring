@@ -8,6 +8,7 @@ import com.nttdata.filemonitor.config.DefaultProfileUtil;
 
 import io.github.jhipster.config.JHipsterConstants;
 
+import org.apache.commons.net.ftp.FTPClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.boot.SpringApplication;
@@ -22,6 +23,7 @@ import org.springframework.data.mongodb.repository.config.EnableMongoRepositorie
 import javax.annotation.PostConstruct;
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.net.InetAddress;
 import java.util.Arrays;
 import java.util.Collection;
@@ -109,5 +111,6 @@ public class FileMonitoringApp {
         } catch (Exception e) {
             e.printStackTrace();
         }
+
     }
 }
