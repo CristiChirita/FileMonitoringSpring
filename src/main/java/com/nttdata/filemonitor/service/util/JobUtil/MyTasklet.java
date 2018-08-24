@@ -49,12 +49,6 @@ public class MyTasklet implements Tasklet {
     @PostConstruct
     public void setUp() {
         baseFile = new File(folderLocation);
-        try {
-            client.connect("127.0.0.1");
-            login = client.login("FileMonitoring", "pass");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
     }
 
     @Override
@@ -147,16 +141,22 @@ public class MyTasklet implements Tasklet {
                 System.out.println("Sent message: " + response);
             }
         }
-            if (login) {
+        try {
+            client.connect("127.0.0.1");
+            login = client.login("FileMonitoring", "pass");
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        if (login) {
 
-                System.out.println("Connection established...");
+            System.out.println("Connection established...");
 
-                // Try to logout and return the respective boolean value
+            // Try to logout and return the respective boolean value
 
-            } else {
-                System.out.println("Connection fail...");
-            }
-
+        } else {
+            System.out.println("Connection fail...");
+        }
+        client.logout();
         return RepeatStatus.FINISHED;
     }
 
